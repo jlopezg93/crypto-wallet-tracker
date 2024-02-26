@@ -1,0 +1,5 @@
+# .gitignore
+
+# Ignore config files
+config.py
+
