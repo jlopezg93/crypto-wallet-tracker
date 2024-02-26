@@ -1,9 +1,11 @@
+# Your main script
 import requests
 import json
 import time
 import os.path
 import re
 from web3 import Web3
+from config import ETHERSCAN_API_KEY, BSCSCAN_API_KEY, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
 
 
 # Define some helper functions
@@ -143,7 +145,6 @@ Use /list <blockchain> to list all wallets being monitored for a specific blockc
 
 Example: /list ETH or just /list
 
-Don't forget to star my Github repo if you find this bot useful! https://github.com/cankatx/crypto-wallet-tracker ⭐️
     """
     context.bot.send_message(chat_id=update.message.chat_id, text=message)
 
