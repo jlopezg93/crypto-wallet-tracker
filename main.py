@@ -6,10 +6,10 @@ import re
 from web3 import Web3
 
 # Update the following variables with your own Etherscan and BscScan API keys and Telegram bot token
-ETHERSCAN_API_KEY = ''
-BSCSCAN_API_KEY = ''
-TELEGRAM_BOT_TOKEN = ''
-TELEGRAM_CHAT_ID = ''
+ETHERSCAN_API_KEY = 'UHTXW413IP3K3MHMDW49BEHA8KGGNQTJ2U'
+BSCSCAN_API_KEY = 'GM79XWR329635VHTXIZ2KMKD12PF8BM45W'
+TELEGRAM_BOT_TOKEN = '6453722898:AAEoqPUg6371wvuOx6uZsMn28FloPLf8gCI'
+TELEGRAM_CHAT_ID = '-4163442386'
 
 
 # Define some helper functions
@@ -50,7 +50,9 @@ def monitor_wallets():
     watched_wallets = set()
     file_path = "watched_wallets.txt"
     if not os.path.exists(file_path):
-        open(file_path, 'w').close()
+        with open(file_path, 'a'):
+            pass
+
 
     latest_tx_hashes = {}
     latest_tx_hashes_path = "latest_tx_hashes.json"
