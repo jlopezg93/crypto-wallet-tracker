@@ -2,4 +2,4 @@
 
 # Ignore config files
 config.py
-
+__pycache__
