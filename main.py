@@ -76,7 +76,8 @@ def monitor_wallets():
                 watched_wallets = set(f.read().splitlines())
 
             for wallet in watched_wallets:
-                blockchain, wallet_address = wallet.split(':')
+                blockchain, wallet_address, nickname = wallet.split(':')
+                # ... rest of the code ...
                 transactions = get_wallet_transactions(wallet_address, blockchain)
                 for tx in transactions:
                     tx_hash = tx['hash']
@@ -86,13 +87,13 @@ def monitor_wallets():
                         if tx['to'].lower() == wallet_address.lower():
                             value = float(tx['value']) / 10**18 # Convert from wei to ETH or BNB
                             usd_value = value * (eth_usd_price if blockchain == 'eth' else bnb_usd_price) # Calculate value in USD
-                            message = f'🚨 Incoming transaction detected on {wallet_address}'
+                            message = f'🚨 Incoming transaction detected on {nickname} ({wallet_address})'
                             send_telegram_notification(message, value, usd_value, tx['hash'], blockchain)
                             #print(f'\n{message}, Value: {value} {blockchain.upper()}, ${usd_value:.2f}\n')
                         elif tx['from'].lower() == wallet_address.lower():
                             value = float(tx['value']) / 10**18 # Convert from wei to ETH or BNB
                             usd_value = value * (eth_usd_price if blockchain == 'eth' else bnb_usd_price) # Calculate value in USD
-                            message = f'🚨 Outgoing transaction detected on {wallet_address}'
+                            message = f'🚨 Outgoing transaction detected on {nickname} ({wallet_address})'
                             send_telegram_notification(message, value, usd_value, tx['hash'], blockchain)
                             #print(f'\n{message}, Value: {value} {blockchain.upper()}, ${usd_value:.2f}\n')
 
@@ -114,10 +115,10 @@ def monitor_wallets():
             # Sleep for 10 seconds before trying again
             time.sleep(10)
 
-def add_wallet(wallet_address, blockchain):
+def add_wallet(wallet_address, blockchain, nickname):
     file_path = "watched_wallets.txt"
     with open(file_path, 'a') as f:
-        f.write(f'{blockchain}:{wallet_address}\n')
+        f.write(f'{blockchain}:{wallet_address}:{nickname}\n')
 
 def remove_wallet(wallet_address, blockchain):
     file_path = "watched_wallets.txt"
@@ -131,30 +132,32 @@ def remove_wallet(wallet_address, blockchain):
 # Define the command handlers for the Telegram bot
 def start(update, context):
     message = """
-👋 Welcome to the Ethereum and Binance Wallet Monitoring Bot!
+    👋 Welcome to the Ethereum and Binance Wallet Monitoring Bot!
 
-Use /add <blockchain> <wallet_address> to add a new wallet to monitor.
+    Use /add <blockchain> <wallet_address> <nickname> to add a new wallet to monitor.
 
-Example: /add ETH 0x123456789abcdef
+    Example: /add ETH 0x123456789abcdef MyWalletNickname
 
-Use /remove <blockchain> <wallet_address> to stop monitoring a wallet.
+    Use /remove <blockchain> <wallet_address> to stop monitoring a wallet.
 
-Example: /remove ETH 0x123456789abcdef
+    Example: /remove ETH 0x123456789abcdef
 
-Use /list <blockchain> to list all wallets being monitored for a specific blockchain.
+    Use /list <blockchain> to list all wallets being monitored for a specific blockchain.
 
-Example: /list ETH or just /list
+    Example: /list ETH or just /list
 
     """
     context.bot.send_message(chat_id=update.message.chat_id, text=message)
 
+# Modify the /add command handler
 def add(update, context):
-    if len(context.args) < 2:
-        context.bot.send_message(chat_id=update.message.chat_id, text="Please provide a blockchain and wallet address to add.")
+    if len(context.args) < 3:
+        context.bot.send_message(chat_id=update.message.chat_id, text="Please provide a blockchain, wallet address, and nickname to add.")
         return
 
     blockchain = context.args[0].lower()
     wallet_address = context.args[1]
+    nickname = context.args[2]
 
     # Check if the wallet address is in the correct format for the specified blockchain
     if blockchain == 'eth':
@@ -169,9 +172,10 @@ def add(update, context):
         context.bot.send_message(chat_id=update.message.chat_id, text=f"Invalid blockchain specified: {blockchain}")
         return
     
-    add_wallet(wallet_address, blockchain)
-    message = f'Added {wallet_address} to the list of watched {blockchain.upper()} wallets.'
+    add_wallet(wallet_address, blockchain, nickname)
+    message = f'Added {nickname} ({wallet_address}) to the list of watched {blockchain.upper()} wallets.'
     context.bot.send_message(chat_id=update.message.chat_id, text=message)
+
 
 def remove(update, context):
     if len(context.args) < 2:
